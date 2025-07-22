@@ -1,17 +1,20 @@
-🖥️ Infrastructure Monitoring Setup: Prometheus + Grafana + Node Exporter
-This guide walks you through setting up a basic monitoring stack using Prometheus, Grafana, and Node Exporter.
+# 🖥️ Infrastructure Monitoring Setup: Prometheus + Grafana + Node Exporter
 
-1. Install Node Exporter on Each Target Server
-🔧 Create Node Exporter User & Download Binary
-bash
-Copy
-Edit
+This guide walks you through setting up a basic monitoring stack using **Prometheus**, **Grafana**, and **Node Exporter**.
+
+---
+
+## 1. Install Node Exporter on Each Target Server
+
+### Create Node Exporter User & Download Binary
+
+```bash
 sudo useradd -rs /bin/false node_exporter
 cd /tmp
 wget https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz
 tar xvf node_exporter-1.9.1.linux-amd64.tar.gz
 sudo cp node_exporter-1.9.1.linux-amd64/node_exporter /usr/local/bin
-⚙️ Create systemd Service
+Create systemd Service
 bash
 Copy
 Edit
@@ -30,27 +33,27 @@ ExecStart=/usr/local/bin/node_exporter
 [Install]
 WantedBy=multi-user.target
 EOF
-▶️ Start and Enable the Service
+Start and Enable Node Exporter
 bash
 Copy
 Edit
 sudo systemctl daemon-reload
 sudo systemctl start node_exporter
 sudo systemctl enable node_exporter
-✅ Test Node Exporter
+Test Node Exporter
 bash
 Copy
 Edit
 curl http://localhost:9100/metrics
 2. Install Prometheus on Monitoring Server
-🔧 Create Prometheus User and Directories
+Create Prometheus User and Directories
 bash
 Copy
 Edit
 sudo useradd -rs /bin/false prometheus
 sudo mkdir -p /etc/prometheus /var/lib/prometheus
 sudo chown prometheus:prometheus /var/lib/prometheus
-📥 Download and Install Prometheus
+Download and Install Prometheus
 bash
 Copy
 Edit
@@ -60,7 +63,7 @@ tar xvf prometheus-2.48.1.linux-amd64.tar.gz
 cd prometheus-2.48.1.linux-amd64
 sudo cp prometheus promtool /usr/local/bin/
 sudo cp -r consoles console_libraries /etc/prometheus
-⚙️ Create Prometheus Config
+Create Prometheus Config
 bash
 Copy
 Edit
@@ -73,7 +76,7 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.1.10:9100', '192.168.1.11:9100']
 EOF
-🔧 Create systemd Service for Prometheus
+Create systemd Service for Prometheus
 bash
 Copy
 Edit
@@ -87,16 +90,16 @@ After=network-online.target
 User=prometheus
 Group=prometheus
 Type=simple
-ExecStart=/usr/local/bin/prometheus \\
-  --config.file /etc/prometheus/prometheus.yml \\
-  --storage.tsdb.path /var/lib/prometheus \\
-  --web.console.templates=/etc/prometheus/consoles \\
+ExecStart=/usr/local/bin/prometheus \
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus \
+  --web.console.templates=/etc/prometheus/consoles \
   --web.console.libraries=/etc/prometheus/console_libraries
 
 [Install]
 WantedBy=multi-user.target
 EOF
-▶️ Start and Enable the Service
+Start and Enable Prometheus
 bash
 Copy
 Edit
@@ -104,7 +107,7 @@ sudo systemctl daemon-reload
 sudo systemctl start prometheus
 sudo systemctl enable prometheus
 3. Install Grafana on Monitoring Server
-🐧 For Ubuntu/Debian Systems
+For Ubuntu/Debian Systems
 bash
 Copy
 Edit
@@ -113,28 +116,30 @@ sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install grafana
-▶️ Start and Enable the Service
+Start and Enable Grafana
 bash
 Copy
 Edit
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server
 4. Configure Grafana
-➕ Add Data Source
+Add Prometheus as a Data Source
 URL: http://localhost:9090
 
 Type: Prometheus
 
-📊 Import Dashboards (Go to Dashboards → + Import)
-ID 1860 – Node Exporter Full
+Import Dashboards
+Go to Dashboards > + Import and use the following IDs:
 
-ID 14513 – Linux/Windows
+1860 – Node Exporter Full
 
-ID 7587 – Disk I/O & Network
+14513 – Linux/Windows Metrics
 
-ID 3662 – Prometheus Internal Stats
+7587 – Disk I/O & Network
 
-5. Verify Services Status
+3662 – Prometheus Internal Metrics
+
+5. Check Service Status
 bash
 Copy
 Edit
